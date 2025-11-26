@@ -1,5 +1,3 @@
-Template for creating and submitting MAT496 capstone project.
-
 # Overview of MAT496
 
 In this course, we have primarily learned Langgraph. This is helpful tool to build apps which can process unstructured `text`, find information we are looking for, and present the format we choose. Some specific topics we have covered are:
@@ -24,28 +22,34 @@ The first purpose of the capstone project is to give a chance to revise all the 
 
 # Project report Template
 
-## Title: [your title goes here]
+## Title: RAG for Direct NLP Translation between Indic Languages using LangGraph
 
 ## Overview
 
-[your overview goes here. My project does this that  etc]
+- In the status quo today, the standard for translating between language pairs (especially Indic languages which don't have sophisticated corpus) is to use English as a pivot language, ie, the source language gets translated to English and the translated English text gets translated to the target language. Obviously this degrades translation quality as we lose a lot of context when translating twice. 
+- With Indic languages especially, plenty of similarities arise between languages from grammatical syntax to subject verb agreement to loanwords and highly similar words. 
+- My overarching goal is to eventually finetune a pre-existing LLM to exploit these linguistic similarities in aiding direct translation, but this is the one limitation of LangGraph in that I cannot use LangGraph to finetune a model. However I've come to figure out that RAG is a very feasible substitute and a much simpler one at that, so both in the context of this course and for my future prospects in working with LLMs, it's the best first step. We'll be retrieving validated examples of translated sentences from a vector database and using them in the LLM's prompts so our translation will be highly context aware.  
 
 ## Reason for picking up this project
 
-Expain how this project is aligned with this course content.
+- This project has been a personal interest of mine, and so I figured I may as well implement it with my actual learnings from the course. I also believe that it is a novel idea in that it addresses several resource inefficiences when translating in a highly linguistically diverse region and such a thing would be impossible without the use of agents. If I were to implement it with LangGraph, it'd require pretty much everything that's been covered in the course which is just perfect for me. 
+To be more specific:
+- The core of the application is a large conditional graph with multiple nodes that requires a RAG vector store database that utilizes embeddings which is then queried using semantic search. We'll also be using tools to determine when to use this translation functionality. 
+- We'll be using a pydantic schema to extract source and target languages along with the query which  falls under structured outputs and prompting.
 
 ## Plan
 
 I plan to excecute these steps to complete my project.
 
-- [TODO] Step 1 involves blah blah
-- [TODO] Step 2 involves blah blah
-- [TODO] Step 3 involves blah blah
+- [TODO] Step 1: Setting up Python venv, installing all required libraries (langchain, langgraph, pydantic, chromadb maybe?), defining the translation state schema and initializing the LLM (I may either use IndicTrans or gpt-4o-mini) 
+- [TODO] Step 2
+- [TODO] Step 3 
 - ...
-- [TODO] Step n involves blah blah
+- [TODO] Step n 
 
 ## Conclusion:
 
+STILL A WORK IN PROGRESS 
 I had planned to achieve {this this}. I think I have/have-not achieved the conclusion satisfactorily. The reason for your satisfaction/unsatisfaction.
 
 ----------
