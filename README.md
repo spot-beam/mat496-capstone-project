@@ -41,11 +41,14 @@ To be more specific:
 
 I plan to excecute these steps to complete my project.
 
-- [TODO] Step 1: Setting up Python venv, installing all required libraries (langchain, langgraph, pydantic, chromadb maybe?), defining the translation state schema and initializing the LLM (I may either use IndicTrans or gpt-4o-mini) 
-- [TODO] Step 2
-- [TODO] Step 3 
-- ...
-- [TODO] Step n 
+- [DONE] Step 1: Setting up Python venv, installing all required libraries (langchain, langgraph, pydantic, chromadb maybe?), defining the translation state schema and initializing the LLM (I may either use IndicTrans or gpt-4o-mini) 
+- [TODO] Step 2: Define Pydantic model for identifying language, create identification node to use prompting to parse user input into source_lang, target_lang and query_for_retrieval fields in the translation state schema. 
+- [TODO] Step 3: Create RAG database for semantic search, generate a mock set of Indic-Indic parallel sentences, create multilingual embedding model, use it to embed the sentences and store them in the vector store
+- [TODO] Step 4: Define a direct translation tool and tool router node which would be a tool call to decide whether to use RAG or proceed directly to translation
+- [TODO] Step 5: Implement the nodes that require RAG (unnamed as of yet) and a context retrieval node for semantic search 
+- [TODO] Step 6: Build the final graph, connecting the nodes and defining conditional edges.
+- [TODO] Step 7: Make translation node use the RAG's retrieved context in the final generated translation
+- [TODO] Step 8: Testing step. Have to think of what to do and whether any other steps are required once I finish the above steps.
 
 ## Conclusion:
 
