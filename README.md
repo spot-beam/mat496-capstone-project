@@ -44,7 +44,15 @@ I plan to excecute these steps to complete my project.
 - [DONE] Step 1: Setting up Python venv, installing all required libraries (langchain, langgraph, pydantic, chromadb maybe?), defining the translation state schema and initializing the LLM (I may either use IndicTrans or gpt-4o-mini) 
 - [DONE] Step 2: Define Pydantic model for identifying language, create identification node to use prompting to parse user input into source_lang, target_lang and query_for_retrieval fields in the translation state schema. EDIT: Also added mock nodes/functions (retrieve_context, generate_rag_query, etc) to illustrate workflow.
 
-- [TODO] Step 3: Create RAG database for semantic search, generate a mock set of Indic-Indic parallel sentences, create multilingual embedding model, use it to embed the sentences and store them in the vector store
+- [DONE] Step 3: Create RAG database for semantic search, create multilingual embedding model, use it to embed the sentences and store them in the vector store. 
+
+### ADDENDUM: 
+This step was a lot more complicated than I thought. Used an external dataset (Samanantar) from HuggingFace which has a parallel corpus of Indic languages paired with English. However the entire goal of the project is to skip using English as a pivot language. So I fuzzy matched the English sentences across two Samanantar dataset splits as aligned pairs. 
+eg: en->hindi has an English sentence: Police started investigation.
+en->oriya has an English sentence: Police have begun investigating the case.
+These have nearly similar meaning so we treat the Hindi and Oriya translations as an aligned pair. This will be the basis for RAG.
+---
+
 - [TODO] Step 4: Define a direct translation tool and tool router node which would be a tool call to decide whether to use RAG or proceed directly to translation
 - [TODO] Step 5: Implement the nodes that require RAG (unnamed as of yet) and a context retrieval node for semantic search 
 - [TODO] Step 6: Build the final graph, connecting the nodes and defining conditional edges.
