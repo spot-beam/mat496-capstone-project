@@ -46,8 +46,7 @@ I plan to excecute these steps to complete my project.
 
 - [DONE] Step 3: Create RAG database for semantic search, create multilingual embedding model, use it to embed the sentences and store them in the vector store. 
 
-### ADDENDUM: 
-
+Addendum: 
 This step was a lot more complicated than I thought. Used an external dataset (Samanantar) from HuggingFace which has a parallel corpus of Indic languages paired with English. However the entire goal of the project is to skip using English as a pivot language. So I fuzzy matched the English sentences across two Samanantar dataset splits as aligned pairs. 
 eg: en->hindi has an English sentence: Police started investigation.
 en->oriya has an English sentence: Police have begun investigating the case.
