@@ -1,1 +1,12 @@
-*.env
+chroma_indic_pairs_fuzzy/
+chroma_db/
+*.chroma/
+
+.env
+.env.local
+
+__pycache__/
+*.pyc
+venv/
+.venv/
+env/
