@@ -60,7 +60,7 @@ Added the context retrieval node from step 5 here itself.
 - [DONE] Step 7: Make translation node use the RAG's retrieved context in the final generated translation
 Note: It turns out I've already finished step 7 as I can use the direct translation tool as the final translation node and I have implemented the same in Step 6. 
 Extras: I also wrote a test call to see if the graph works at every step. Output can be seen in the notebook at this step. It works as intended!
-- [TODO] Step 8: Testing step. Have to think of what to do and whether any other steps are required once I finish the above steps.
+- [DONE] Step 8: Testing step. I have ran the code as a Python script and the output is feasible. It has been added to the repo, and instructions on running it with uv will be given.
 
 ## Conclusion:
 
