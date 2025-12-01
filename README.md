@@ -54,8 +54,8 @@ These have nearly similar meaning so we treat the Hindi and Oriya translations a
 
 - [DONE] Step 4: Define a direct translation tool and tool router node which would be a tool call to decide whether to use RAG or proceed directly to translation
 Extras: Added a testing.py integrated with uv to directly execute code. Will be updating this with the finished product when I am done with the final step in the notebook. 
-
-- [TODO] Step 5: Implement the nodes that require RAG (unnamed as of yet) and a context retrieval node for semantic search 
+Added the context retrieval node from step 5 here itself.
+- [DONE] Step 5: Implement the direct translation node and context retrieval node.
 - [TODO] Step 6: Build the final graph, connecting the nodes and defining conditional edges.
 - [TODO] Step 7: Make translation node use the RAG's retrieved context in the final generated translation
 - [TODO] Step 8: Testing step. Have to think of what to do and whether any other steps are required once I finish the above steps.
