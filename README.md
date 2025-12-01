@@ -56,8 +56,10 @@ These have nearly similar meaning so we treat the Hindi and Oriya translations a
 Extras: Added a testing.py integrated with uv to directly execute code. Will be updating this with the finished product when I am done with the final step in the notebook. 
 Added the context retrieval node from step 5 here itself.
 - [DONE] Step 5: Implement the direct translation node and context retrieval node.
-- [TODO] Step 6: Build the final graph, connecting the nodes and defining conditional edges.
-- [TODO] Step 7: Make translation node use the RAG's retrieved context in the final generated translation
+- [DONE] Step 6: Build the final graph, connecting the nodes and defining conditional edges. 
+- [DONE] Step 7: Make translation node use the RAG's retrieved context in the final generated translation
+Note: It turns out I've already finished step 7 as I can use the direct translation tool as the final translation node and I have implemented the same in Step 6. 
+Extras: I also wrote a test call to see if the graph works at every step. Output can be seen in the notebook at this step. It works as intended!
 - [TODO] Step 8: Testing step. Have to think of what to do and whether any other steps are required once I finish the above steps.
 
 ## Conclusion:
