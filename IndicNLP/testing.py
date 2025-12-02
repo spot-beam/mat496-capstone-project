@@ -233,13 +233,6 @@ def identify_intent(state: TranslationState) -> dict:
             "messages": [AIMessage(content=f"could not understand translation request. specify both languages and text clearly. Error: {e}")]
         }
     
-def generate_rag_query(state: TranslationState) -> dict:
-    """
-    just returns query_for_retrieval unchanged. 
-    """
-    q = state.get("query_for_retrieval", "")
-    return {"query_for_retrieval": q}
-
 def retrieve_context(state: TranslationState) -> dict:
     """
     Retrieves the top similar pairs from the Indic-Indic vector DB (built in the third step). Returns a string."""
@@ -268,8 +261,6 @@ def retrieve_context(state: TranslationState) -> dict:
         )
 
     return {"retrieved_context": "\n".join(blocks).strip()}
-
-
 
 def tool_router(state: TranslationState) -> dict:
     src = state.get("source_lang")
@@ -341,7 +332,6 @@ def direct_translate(state: TranslationState) -> dict:
 def build_graph():
     workflow = StateGraph(TranslationState)
     workflow.add_node("identify_intent", identify_intent)
-    workflow.add_node("generate_rag_query", generate_rag_query)
     workflow.add_node("tool_router", tool_router)
     workflow.add_node("retrieve_context", retrieve_context)
     workflow.add_node("direct_translate", direct_translate)
