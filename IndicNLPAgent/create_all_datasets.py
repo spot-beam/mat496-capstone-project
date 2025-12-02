@@ -1,4 +1,4 @@
-from testing import build_indic_indic_rag_fuzzy, _INDIC_VECTOR_STORES
+from main import build_indic_indic_rag_fuzzy, _INDIC_VECTOR_STORES
 
 LANG_PAIRS = [
     ("hi", "or"),   # Hindi - Odia

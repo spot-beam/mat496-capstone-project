@@ -1,7 +1,7 @@
 import streamlit as st
 from langchain_core.messages import HumanMessage
 
-from testing import build_graph   
+from main import build_graph   
 
 st.set_page_config(
     page_title="Indic-Indic NLP-Powered RAG Translation Agent",
