@@ -18,6 +18,7 @@ import numpy as np
 from sklearn.neighbors import NearestNeighbors
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import SentenceTransformerEmbeddings
+import itertools
 
 _INDIC_VECTOR_STORES = {}
 
@@ -64,34 +65,34 @@ def build_indic_indic_rag_fuzzy(
 
     # Subsample for efficiency
     if sample_per_lang < len(ds_src):
-        ds_src = ds_src.select(random.sample(range(len(ds_src)), sample_per_lang))
+        idx_src = np.random.choice(len(ds_src), size=sample_per_lang, replace=False)
+        ds_src = ds_src.select(idx_src)
+
     if sample_per_lang < len(ds_tgt):
-        ds_tgt = ds_tgt.select(random.sample(range(len(ds_tgt)), sample_per_lang))
+        idx_tgt = np.random.choice(len(ds_tgt), size=sample_per_lang, replace=False)
+        ds_tgt = ds_tgt.select(idx_tgt)
 
     print("Sample sizes:", len(ds_src), len(ds_tgt))
 
-    df_src_raw = pd.DataFrame(ds_src)[["src", "tgt"]]
-    df_tgt_raw = pd.DataFrame(ds_tgt)[["src", "tgt"]]
+    src_df = pd.DataFrame(ds_src, columns=["src", "tgt"])
+    tgt_df = pd.DataFrame(ds_tgt, columns=["src", "tgt"])
 
-    df_src_raw.columns = ["en_src", "src_indic"]
-    df_tgt_raw.columns = ["en_tgt", "tgt_indic"]
+    src_df.rename(columns={"src": "en_src", "tgt": "src_indic"}, inplace=True)
+    tgt_df.rename(columns={"src": "en_tgt", "tgt": "tgt_indic"}, inplace=True)
 
     embedder = SentenceTransformerEmbeddings(model_name=embed_model_name)
 
-    en_src_list = df_src_raw["en_src"].tolist()
-    en_tgt_list = df_tgt_raw["en_tgt"].tolist()
+    en_src_list = src_df["en_src"].tolist()
+    en_tgt_list = tgt_df["en_tgt"].tolist()
 
     en_src_emb = np.array(embedder.embed_documents(en_src_list))
     en_tgt_emb = np.array(embedder.embed_documents(en_tgt_list))
 
-    def normalize(v):
-        return v / np.linalg.norm(v, axis=1, keepdims=True)
-
-    en_src_emb = normalize(en_src_emb)
-    en_tgt_emb = normalize(en_tgt_emb)
+    en_src_emb /= np.linalg.norm(en_src_emb, axis=1, keepdims=True) #normalization
+    en_tgt_emb /= np.linalg.norm(en_tgt_emb, axis=1, keepdims=True)
 
     # nearest neighbor search for english alignment
-    nn = NearestNeighbors(n_neighbors=1, metric="cosine")
+    nn = NearestNeighbors(n_neighbors=1, metric="cosine", algorithm="auto")
     nn.fit(en_tgt_emb)
 
     distances, indices = nn.kneighbors(en_src_emb)
@@ -101,48 +102,50 @@ def build_indic_indic_rag_fuzzy(
     print(f"Pairs above threshold {sim_threshold}: {np.sum(sims >= sim_threshold)}")
 
     # build aligned Indic-Indic rows
-    aligned = []
-    for i, sim in enumerate(sims):
-        if sim >= sim_threshold:
-            tgt_idx = indices[i]
-            aligned.append({
-                "src_indic": df_src_raw.iloc[i]["src_indic"],
-                "tgt_indic": df_tgt_raw.iloc[tgt_idx]["tgt_indic"],
-                "sim": float(sim),
-                "en_src": df_src_raw.iloc[i]["en_src"],
-                "en_tgt": df_tgt_raw.iloc[tgt_idx]["en_tgt"]
-            })
+    valid_mask = sims >= sim_threshold
+    valid_src_idx = np.where(valid_mask)[0]
+    valid_tgt_idx = indices[valid_mask].flatten()
 
-    aligned_df = pd.DataFrame(aligned)
+    aligned_df = pd.DataFrame({
+        "src_indic": src_df.iloc[valid_src_idx]["src_indic"].values,
+        "tgt_indic": tgt_df.iloc[valid_tgt_idx]["tgt_indic"].values,
+        "sim": sims[valid_mask],
+        "en_src": src_df.iloc[valid_src_idx]["en_src"].values,
+        "en_tgt": tgt_df.iloc[valid_tgt_idx]["en_tgt"].values
+    })
     print("Aligned Indic–Indic pairs:", aligned_df.shape)
 
     if aligned_df.empty:
         raise ValueError("No fuzzy matches found")
 
-    metadatas = []
-    for _, row in aligned_df.iterrows():
-        metadatas.append({
-            "src_indic": str(row["src_indic"]),
-            "tgt_indic": str(row["tgt_indic"]),
-            "sim": float(row["sim"]),
-            "en_src": str(row["en_src"]),
-            "en_tgt": str(row["en_tgt"]),
-        })
+    metadatas = [
+        {
+            "src_indic": src,
+            "tgt_indic": tgt,
+            "sim": float(sim),
+            "en_src": en_s,
+            "en_tgt": en_t
+        }
+        for src, tgt, sim, en_s, en_t in zip(
+            aligned_df["src_indic"],
+            aligned_df["tgt_indic"],
+            aligned_df["sim"],
+            aligned_df["en_src"],
+            aligned_df["en_tgt"],
+        )
+    ]
 
-    # source indic texts to embed
-    texts = [str(x) for x in aligned_df["src_indic"].tolist()]
-    ids   = [str(i) for i in range(len(texts))]
+    texts = aligned_df["src_indic"].astype(str).tolist()
+    ids = [str(i) for i in range(len(texts))]
 
-    # build vector store
     persist_dir = f"{persist_root}/{src_indic}_{tgt_indic}"
     collection_name = f"indic_fuzzy_{src_indic}_{tgt_indic}"
 
     vector_store = Chroma(
         collection_name=collection_name,
-        embedding_function=SentenceTransformerEmbeddings(model_name=embed_model_name),
+        embedding_function=embedder,
         persist_directory=persist_dir
     )
-
     # add to chroma
     vector_store.add_texts(
         texts=texts,

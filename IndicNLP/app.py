@@ -1,39 +1,91 @@
 import streamlit as st
 from langchain_core.messages import HumanMessage
 
-from testing import build_graph
+from testing import build_graph   
 
-st.title("Indic - Indic RAG-based Translation")
-st.write("""
-A LangGraph application using fuzzy Indic-Indic RAG (Hindi, Odia, Tamil, Bengali, etc.) which contains Indic-Indic translation pairs instead of English as a pivot.
-Enter any translation request in natural language with instructions on the language to translate to.
+st.set_page_config(
+    page_title="Indic-Indic NLP-Powered RAG Translation Agent",
+    layout="wide",
+)
+
+st.sidebar.title("Indic-Indic RAG Translation")
+st.sidebar.markdown("""
+This application performs direct translation between Indic languages using LangGraph and fuzzy-aligned Indic-Indic sentence pairs that were created without the usage of English as a pivot, using the Samanantar dataset.
 """)
 
-# User input form
-user_text = st.text_area("Enter translation request:", height=150)
+st.sidebar.markdown("---")
+st.sidebar.header("Instructions")
+st.sidebar.markdown("""
+Enter a translation command in natural language.  
+Examples:
 
-if st.button("Translate"):
+- मैं इसका उड़िया में अनुवाद करना चाहता हूँ: मैं आकाश हूँ और मुझे वनीला आइसक्रीम बहुत पसंद है 
+- Translate this to Tamil: ਮੇਰਾ ਨਾਮ ਆਕਾਸ਼ ਹੈ ਅਤੇ ਮੈਨੂੰ ਵਨੀਲਾ ਆਈਸ ਕਰੀਮ ਬਹੁਤ ਪਸੰਦ ਹੈ।         
+""")
+
+st.sidebar.markdown("---")
+st.sidebar.caption("Built for the MAT496 Capstone Project.")
+
+st.markdown("""
+# Direct Indic - Indic Translation using RAG & LangGraph
+A retrieval-augmented translation system that avoids English as a pivot language by using fuzzy-aligned Indic sentence pairs. Supported languages: English, Assamese, Bengali, Gujarati, Hindi, Kannada, Malayalam, Marathi, Oriya, Punjabi, Tamil, Telugu
+
+""")
+st.markdown("""Translation datasets already generated: Bengali->Oriya, Hindi->Assamese, Hindi->Bengali, Hindi->Gujarati, Hindi->Kannada, Hindi->Malayalam, Hindi->Marathi, Hindi->Oriya, Hindi->Punjabi, Hindi->Tamil, Hindi->Telugu, Oriya->Hindi, Tamil->Hindi, Tamil->Malayalam, Tamil->Punjabi
+""")
+st.markdown("""*For other use cases, for eg. Punjabi->Malayalam, a dataset will be created while the graph is running and then proceed to translation. This may take time.
+For languages not listed above, direct translation will be utilized.*""")
+st.markdown("### Enter Translation Request")
+
+user_text = st.text_area(
+    "Type your translation request here",
+    height=160,
+    placeholder="Example: मैं इसका उड़िया में अनुवाद करना चाहता हूँ: मैं आकाश हूँ और मुझे वनीला आइसक्रीम बहुत पसंद है"
+)
+
+submit = st.button("Translate")
+
+if submit:
     if not user_text.strip():
-        st.error("Please enter a valid translation request.")
+        st.warning("Please enter some text.")
+        st.stop()
+
+    st.markdown("### Processing:")
+    with st.spinner("Running graph:"):
+        graph = build_graph()  
+        user_msg = HumanMessage(content=user_text.strip())
+        initial_state = {"messages": [user_msg]}
+        result = graph.invoke(initial_state)
+
+    st.markdown("## Translation Results")
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("**Detected Source Language:**", result.get("source_lang"))
+        st.write("**Detected Target Language:**", result.get("target_lang"))
+
+    with col2:
+        st.write("**Text to Translate:**")
+        st.info(result.get("query_for_retrieval"))
+
+    st.markdown("---")
+
+    retrieved = result.get("retrieved_context")
+
+    if retrieved:
+        st.markdown("### Retrieved Context (RAG)")
+        st.caption("These aligned Indic-Indic sentence pairs guided the translation.")
+
+        with st.expander("View All Retrieved Examples"):
+            st.text(retrieved)
     else:
-        with st.spinner("Running graph:"):
-            user_msg = HumanMessage(content=user_text)
-            initial_state = {"messages": [user_msg]}
+        st.markdown("### Retrieved Context (RAG)")
+        st.info("No context retrieved. Direct translation used.")
 
-            graph = build_graph()
-            result = graph.invoke(initial_state)
+    st.markdown("---")
 
-        st.subheader("Detected parameters")
-        st.write(f"**Source language**: {result.get('source_lang')}")
-        st.write(f"**Target language**: {result.get('target_lang')}")
-        st.write(f"**Text to translate**: {result.get('query_for_retrieval')}")
+    st.markdown("### Final Translation")
+    st.success(result.get("final_translation"))
 
-        st.subheader("Retrieved Context (RAG)")
-        ctx = result.get("retrieved_context") or ""
-        if ctx:
-            st.code(ctx)
-        else:
-            st.info("No RAG context retrieved, using direct translation path.")
-
-        st.subheader("Final Translation")
-        st.success(result.get("final_translation"))
+    st.markdown("---")
+    st.caption("End of translation.")
